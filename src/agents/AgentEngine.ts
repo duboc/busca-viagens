@@ -77,7 +77,7 @@ export async function executeSearch(
     await updateSearchStatus(searchId, 'parsing');
 
     const { flights: parsedFlights, latencyMs: parseLatency } =
-      runParserAgent(searchId, results, (step) => {
+      await runParserAgent(searchId, results, (step) => {
         callbacks.onStep(step);
         insertAgentLog(agentStepToLog(searchId, step, {
           latencyMs: step.status === 'completed' ? parseLatency : undefined,

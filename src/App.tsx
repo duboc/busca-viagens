@@ -7,6 +7,7 @@ import HistoryPage from './components/history/HistoryPage';
 import AlertsPage from './components/alerts/AlertsPage';
 import SettingsPage from './components/settings/SettingsPage';
 import AnalyticsPage from './components/analytics/AnalyticsPage';
+import FareCalendarPage from './components/calendar/FareCalendarPage';
 import AgentConsole from './components/agent/AgentConsole';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import { useDatabase } from './hooks/useDatabase';
@@ -27,6 +28,7 @@ function AppContent() {
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/calendar" element={<FareCalendarPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>

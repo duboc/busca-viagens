@@ -7,6 +7,8 @@ interface AgentState {
   consoleOpen: boolean;
   totalTokens: number;
   totalLatencyMs: number;
+  searchStartTime: number | null;
+  searchEndTime: number | null;
 
   addStep: (step: AgentStep) => void;
   updateStep: (agent: string, stepNum: number, update: Partial<AgentStep>) => void;
@@ -24,6 +26,8 @@ export const useAgentStore = create<AgentState>((set) => ({
   consoleOpen: false,
   totalTokens: 0,
   totalLatencyMs: 0,
+  searchStartTime: null,
+  searchEndTime: null,
 
   addStep: (step) =>
     set((state) => ({ steps: [...state.steps, step] })),
@@ -33,7 +37,12 @@ export const useAgentStore = create<AgentState>((set) => ({
         s.agent === agent && s.step === stepNum ? { ...s, ...update } : s,
       ),
     })),
-  setRunning: (running) => set({ isRunning: running }),
+  setRunning: (running) =>
+    set((state) => ({
+      isRunning: running,
+      searchStartTime: running ? Date.now() : state.searchStartTime,
+      searchEndTime: !running && state.searchStartTime ? Date.now() : state.searchEndTime,
+    })),
   toggleConsole: () => set((state) => ({ consoleOpen: !state.consoleOpen })),
   setConsoleOpen: (open) => set({ consoleOpen: open }),
   addTokens: (count) =>
@@ -46,5 +55,7 @@ export const useAgentStore = create<AgentState>((set) => ({
       isRunning: false,
       totalTokens: 0,
       totalLatencyMs: 0,
+      searchStartTime: null,
+      searchEndTime: null,
     }),
 }));

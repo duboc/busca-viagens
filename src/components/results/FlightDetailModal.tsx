@@ -1,5 +1,6 @@
 import type { Flight } from '../../agents/types';
-import { formatPrice, formatDuration, formatTime, formatDate, formatStops } from '../../utils/formatters';
+import { formatPrice, formatDate, formatBaggage } from '../../utils/formatters';
+import FlightTimeline from './FlightTimeline';
 
 interface FlightDetailModalProps {
   flight: Flight | null;
@@ -20,7 +21,9 @@ export default function FlightDetailModal({ flight, open, onClose }: FlightDetai
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-xl"
           >
-            ✕
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
@@ -42,53 +45,72 @@ export default function FlightDetailModal({ flight, open, onClose }: FlightDetai
 
           {/* Outbound */}
           <Section title="Ida">
-            <FlightLeg
-              airline={flight.outboundAirline}
-              flightNo={flight.outboundFlightNo}
-              departure={flight.outboundDeparture}
-              arrival={flight.outboundArrival}
-              origin={flight.outboundOrigin}
-              dest={flight.outboundDest}
-              duration={flight.outboundDurationMin}
-              stops={flight.outboundStops}
-              stopCities={flight.outboundStopCities}
-            />
+            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-900">
+                  {flight.outboundAirline} {flight.outboundFlightNo}
+                </span>
+                <span className="text-xs text-gray-500">{formatDate(flight.outboundDeparture)}</span>
+              </div>
+              <FlightTimeline
+                departure={flight.outboundDeparture}
+                arrival={flight.outboundArrival}
+                origin={flight.outboundOrigin}
+                dest={flight.outboundDest}
+                durationMin={flight.outboundDurationMin}
+                stops={flight.outboundStops}
+                stopCities={flight.outboundStopCities}
+                stopDurations={flight.outboundStopDurations}
+              />
+            </div>
           </Section>
 
           {/* Return */}
           {flight.returnDeparture && (
             <Section title="Volta">
-              <FlightLeg
-                airline={flight.returnAirline}
-                flightNo={flight.returnFlightNo}
-                departure={flight.returnDeparture}
-                arrival={flight.returnArrival!}
-                origin={flight.returnOrigin!}
-                dest={flight.returnDest!}
-                duration={flight.returnDurationMin}
-                stops={flight.returnStops ?? 0}
-                stopCities={flight.returnStopCities}
-              />
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-900">
+                    {flight.returnAirline} {flight.returnFlightNo}
+                  </span>
+                  <span className="text-xs text-gray-500">{formatDate(flight.returnDeparture)}</span>
+                </div>
+                <FlightTimeline
+                  departure={flight.returnDeparture}
+                  arrival={flight.returnArrival!}
+                  origin={flight.returnOrigin!}
+                  dest={flight.returnDest!}
+                  durationMin={flight.returnDurationMin}
+                  stops={flight.returnStops ?? 0}
+                  stopCities={flight.returnStopCities}
+                  stopDurations={flight.returnStopDurations}
+                />
+              </div>
             </Section>
           )}
 
           {/* Details */}
-          <Section title="Informações">
+          <Section title="Informacoes">
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <DetailItem label="Classe" value={flight.fareClass ?? 'Econômica'} />
-              <DetailItem label="Reembolsável" value={flight.refundable ? 'Sim' : 'Não'} />
-              <DetailItem label="Confiança" value={`${Math.round(flight.confidence * 100)}%`} />
+              <DetailItem label="Classe" value={flight.fareClass ?? 'Economica'} />
+              <DetailItem label="Reembolsavel" value={flight.refundable ? 'Sim' : 'Nao'} />
+              <DetailItem label="Confianca" value={`${Math.round(flight.confidence * 100)}%`} />
               <DetailItem label="Fonte" value={flight.source} />
               {flight.rankScore != null && (
                 <DetailItem label="Score" value={`${flight.rankScore}/100`} />
+              )}
+              {flight.baggageIncluded && (
+                <div className="col-span-2">
+                  <DetailItem label="Bagagem" value={formatBaggage(flight.baggageIncluded)} />
+                </div>
               )}
             </div>
           </Section>
 
           {/* Ranking reasoning */}
           {flight.rankReasoning && (
-            <Section title="Análise">
-              <p className="text-sm text-gray-600 italic">"{flight.rankReasoning}"</p>
+            <Section title="Analise">
+              <p className="text-sm text-gray-600 italic">&ldquo;{flight.rankReasoning}&rdquo;</p>
             </Section>
           )}
 
@@ -122,38 +144,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <div>
       <h3 className="text-sm font-semibold text-gray-500 mb-2">{title}</h3>
       {children}
-    </div>
-  );
-}
-
-function FlightLeg({
-  airline, flightNo, departure, arrival, origin, dest, duration, stops, stopCities,
-}: {
-  airline?: string; flightNo?: string; departure: string; arrival: string;
-  origin: string; dest: string; duration?: number; stops: number; stopCities?: string[];
-}) {
-  return (
-    <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-gray-900">{airline} {flightNo}</span>
-        <span className="text-xs text-gray-500">{formatDate(departure)}</span>
-      </div>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-lg font-bold">{formatTime(departure)}</p>
-          <p className="text-xs text-gray-500">{origin}</p>
-        </div>
-        <div className="text-center text-xs text-gray-400">
-          {duration ? formatDuration(duration) : '—'}
-          <br />
-          {formatStops(stops)}
-          {stopCities?.length ? ` (${stopCities.join(', ')})` : ''}
-        </div>
-        <div className="text-right">
-          <p className="text-lg font-bold">{formatTime(arrival)}</p>
-          <p className="text-xs text-gray-500">{dest}</p>
-        </div>
-      </div>
     </div>
   );
 }

@@ -1,6 +1,9 @@
-import type { Flight } from '../../agents/types';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { Flight, Trip } from '../../agents/types';
 import { formatPrice, formatBaggage } from '../../utils/formatters';
 import FlightTimeline from './FlightTimeline';
+import { useTripStore } from '../../stores/tripStore';
 
 interface FlightCardProps {
   flight: Flight;
@@ -13,6 +16,37 @@ interface FlightCardProps {
 export default function FlightCard({ flight, rank, onSelect, isComparing = false, onToggleCompare }: FlightCardProps) {
   const badges = flight.badges ?? [];
   const hasBadge = badges.length > 0;
+
+  const navigate = useNavigate();
+  const { trips, loadTrips, addFlightToTrip, createTrip } = useTripStore();
+  const [showTripMenu, setShowTripMenu] = useState(false);
+  const [addedToTrip, setAddedToTrip] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (showTripMenu && trips.length === 0) {
+      loadTrips();
+    }
+  }, [showTripMenu, trips.length, loadTrips]);
+
+  const handleAddToTrip = async (trip: Trip) => {
+    try {
+      await addFlightToTrip(trip.id, flight.id);
+      setAddedToTrip(trip.name);
+      setShowTripMenu(false);
+      setTimeout(() => setAddedToTrip(null), 2500);
+    } catch {
+      // silently fail
+    }
+  };
+
+  const handleNewTrip = async () => {
+    const dest = flight.outboundDest ?? '';
+    const name = `Viagem para ${dest}`;
+    const id = await createTrip(name, undefined, '✈️');
+    await addFlightToTrip(id, flight.id);
+    setShowTripMenu(false);
+    navigate(`/trips/${id}`);
+  };
 
   return (
     <div
@@ -135,9 +169,54 @@ export default function FlightCard({ flight, rank, onSelect, isComparing = false
         )}
       </div>
 
-      {/* Booking button */}
-      {flight.bookingUrl && (
-        <div className="mt-3 flex justify-end">
+      {/* Booking + Add to Trip */}
+      <div className="mt-3 flex items-center justify-between">
+        {/* Add to trip */}
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
+          {addedToTrip ? (
+            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+              Adicionado a &quot;{addedToTrip}&quot;
+            </span>
+          ) : (
+            <>
+              <button
+                onClick={() => setShowTripMenu(!showTripMenu)}
+                className="px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center gap-1"
+              >
+                <span>+</span>
+                Adicionar a viagem
+              </button>
+              {showTripMenu && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowTripMenu(false)} />
+                  <div className="absolute bottom-full left-0 mb-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1 min-w-[200px]">
+                    {trips.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => handleAddToTrip(t)}
+                        className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                      >
+                        <span>{t.coverEmoji}</span>
+                        <span className="truncate">{t.name}</span>
+                      </button>
+                    ))}
+                    <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+                    <button
+                      onClick={handleNewTrip}
+                      className="w-full px-3 py-2 text-left text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-2 transition-colors font-medium"
+                    >
+                      <span>+</span>
+                      Nova viagem
+                    </button>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Booking button */}
+        {flight.bookingUrl && (
           <a
             href={flight.bookingUrl}
             target="_blank"
@@ -147,8 +226,8 @@ export default function FlightCard({ flight, rank, onSelect, isComparing = false
           >
             Reservar
           </a>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

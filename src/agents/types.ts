@@ -334,3 +334,64 @@ export interface AirlineInfo {
   name: string;
   alliance: string | null;
 }
+
+// --- Fare Calendar & Predictions types ---
+
+export interface PriceHistoryEntry {
+  id: string;
+  origin: string;
+  destination: string;
+  departureDate: string;
+  price: number;
+  currency: string;
+  source?: string;
+  recordedAt: string;
+}
+
+export interface FarePrediction {
+  trend: 'rising' | 'falling' | 'stable';
+  confidence: number;
+  predictedPrice: number;
+  recommendation: string;
+}
+
+export interface BestTimeToBuyInfo {
+  bestDayOfWeek: number;
+  bestDayName: string;
+  avgSavings: number;
+  cheapestMonths: number[];
+  priceRange: { min: number; max: number };
+}
+
+// --- Trip Planner types ---
+
+export interface Trip {
+  id: string;
+  name: string;
+  description?: string;
+  coverEmoji: string;
+  startDate?: string;
+  endDate?: string;
+  totalBudget?: number;
+  currency: string;
+  status: 'planning' | 'booked' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TripItem {
+  id: string;
+  tripId: string;
+  itemType: 'flight' | 'hotel' | 'activity' | 'transport' | 'note';
+  title: string;
+  dateStart?: string;
+  dateEnd?: string;
+  location?: string;
+  cost: number;
+  currency: string;
+  notes?: string;
+  bookingUrl?: string;
+  flightId?: string;
+  sortOrder: number;
+  createdAt: string;
+}

@@ -124,6 +124,53 @@ CREATE INDEX IF NOT EXISTS idx_flights_rank ON flights(rank_score DESC);
 CREATE INDEX IF NOT EXISTS idx_agent_logs_search ON agent_logs(search_id, agent_name);
 CREATE INDEX IF NOT EXISTS idx_searches_status ON searches(status);
 CREATE INDEX IF NOT EXISTS idx_airports_city ON airports(city);
+
+CREATE TABLE IF NOT EXISTS price_history (
+  id TEXT PRIMARY KEY,
+  origin TEXT NOT NULL,
+  destination TEXT NOT NULL,
+  departure_date TEXT NOT NULL,
+  price REAL NOT NULL,
+  currency TEXT DEFAULT 'BRL',
+  source TEXT,
+  recorded_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_history_route ON price_history(origin, destination, departure_date);
+
+CREATE TABLE IF NOT EXISTS trips (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  cover_emoji TEXT DEFAULT '✈️',
+  start_date TEXT,
+  end_date TEXT,
+  total_budget REAL,
+  currency TEXT DEFAULT 'BRL',
+  status TEXT DEFAULT 'planning',
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS trip_items (
+  id TEXT PRIMARY KEY,
+  trip_id TEXT NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  item_type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  date_start TEXT,
+  date_end TEXT,
+  location TEXT,
+  cost REAL DEFAULT 0,
+  currency TEXT DEFAULT 'BRL',
+  notes TEXT,
+  booking_url TEXT,
+  flight_id TEXT REFERENCES flights(id),
+  sort_order INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_trip_items_trip ON trip_items(trip_id, sort_order);
+CREATE INDEX IF NOT EXISTS idx_trips_status ON trips(status);
 `;
 
 export function runMigrations(db: Database): void {

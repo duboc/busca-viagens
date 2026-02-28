@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: '/analytics', label: 'Analytics', icon: '📈' },
   { to: '/calendar', label: 'Calendário', icon: '📅' },
   { to: '/alerts', label: 'Alertas', icon: '🔔' },
+  { to: '/trips', label: 'Viagens', icon: '🗺️' },
   { to: '/settings', label: 'Configurações', icon: '⚙️' },
 ];
 

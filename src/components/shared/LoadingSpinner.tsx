@@ -4,9 +4,9 @@ export default function LoadingSpinner({ size = 'md', text }: { size?: 'sm' | 'm
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-8">
       <div
-        className={`${sizeClass} animate-spin rounded-full border-2 border-gray-200 border-t-blue-600`}
+        className={`${sizeClass} animate-spin rounded-full border-2 border-gray-200 dark:border-gray-700 border-t-blue-600 dark:border-t-blue-400`}
       />
-      {text && <p className="text-sm text-gray-500">{text}</p>}
+      {text && <p className="text-sm text-gray-500 dark:text-gray-400">{text}</p>}
     </div>
   );
 }

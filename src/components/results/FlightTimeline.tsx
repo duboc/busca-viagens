@@ -35,11 +35,11 @@ export default function FlightTimeline({
       {/* Airline info */}
       {!compact && airline && (
         <div className="mb-2 flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-700">
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             {airline}
           </span>
           {flightNo && (
-            <span className="text-xs text-gray-400">{flightNo}</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">{flightNo}</span>
           )}
         </div>
       )}
@@ -48,16 +48,16 @@ export default function FlightTimeline({
       <div className="flex items-center gap-3">
         {/* Departure */}
         <div className="text-center shrink-0">
-          <p className={compact ? 'text-sm font-semibold' : 'text-lg font-semibold'}>
+          <p className={`${compact ? 'text-sm font-semibold' : 'text-lg font-semibold'} text-gray-900 dark:text-gray-100`}>
             {formatTime(departure)}
           </p>
-          <p className="text-xs text-gray-500 font-medium">{origin}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{origin}</p>
         </div>
 
         {/* Line with stops */}
         <div className="flex-1 flex flex-col items-center gap-1 min-w-0">
           {/* Duration label */}
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 dark:text-gray-500">
             {durationMin ? formatDuration(durationMin) : '--'}
           </p>
 
@@ -65,27 +65,27 @@ export default function FlightTimeline({
           <div className="w-full flex items-center">
             {/* Origin dot */}
             <div
-              className={`${dotSize} rounded-full bg-blue-600 shrink-0`}
+              className={`${dotSize} rounded-full bg-blue-600 dark:bg-blue-400 shrink-0`}
             />
 
             {stops === 0 ? (
               // Direct flight - single line
-              <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-600 to-blue-400 mx-0.5" />
+              <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-500 mx-0.5" />
             ) : (
               // Stops - segmented line
               <div className="flex-1 flex items-center mx-0.5">
                 {Array.from({ length: stops + 1 }).map((_, segIdx) => (
                   <div key={segIdx} className="contents">
-                    <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-500 to-blue-300" />
+                    <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-500 to-blue-300 dark:from-blue-400 dark:to-blue-500" />
                     {segIdx < stops && (
                       <div className="relative group shrink-0">
                         <div
-                          className={`${stopDotSize} rounded-full bg-orange-400 border-2 border-white ring-1 ring-orange-200`}
+                          className={`${stopDotSize} rounded-full bg-orange-400 border-2 border-white dark:border-gray-800 ring-1 ring-orange-200 dark:ring-orange-700`}
                         />
                         {/* Tooltip for stop */}
                         {(stopCities?.[segIdx] || stopDurations?.[segIdx]) && (
                           <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block z-10">
-                            <div className="bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                            <div className="bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 text-xs rounded px-2 py-1 whitespace-nowrap">
                               {stopCities?.[segIdx] ?? ''}
                               {stopDurations?.[segIdx]
                                 ? ` (${formatDuration(stopDurations[segIdx])})`
@@ -102,11 +102,11 @@ export default function FlightTimeline({
 
             {/* Destination dot */}
             <div
-              className={`${dotSize} rounded-full bg-blue-400 shrink-0`}
+              className={`${dotSize} rounded-full bg-blue-400 dark:bg-blue-500 shrink-0`}
             />
 
             {/* Plane icon */}
-            <span className="ml-1 text-gray-400 text-xs shrink-0">
+            <span className="ml-1 text-gray-400 dark:text-gray-500 text-xs shrink-0">
               <PlaneIcon />
             </span>
           </div>
@@ -114,14 +114,14 @@ export default function FlightTimeline({
           {/* Stop info label */}
           <div className="flex items-center gap-1 text-xs">
             {stops === 0 ? (
-              <span className="text-green-600 font-medium">Direto</span>
+              <span className="text-green-600 dark:text-green-400 font-medium">Direto</span>
             ) : (
               <>
-                <span className="text-orange-500 font-medium">
+                <span className="text-orange-500 dark:text-orange-400 font-medium">
                   {stops === 1 ? '1 parada' : `${stops} paradas`}
                 </span>
                 {stopCities && stopCities.length > 0 && (
-                  <span className="text-gray-400">
+                  <span className="text-gray-400 dark:text-gray-500">
                     via {stopCities.join(', ')}
                   </span>
                 )}
@@ -135,7 +135,7 @@ export default function FlightTimeline({
               {stopDurations.map((dur, i) => (
                 <span
                   key={i}
-                  className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded"
+                  className="text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 px-1.5 py-0.5 rounded"
                 >
                   {stopCities?.[i] ?? `Escala ${i + 1}`}:{' '}
                   {formatDuration(dur)}
@@ -147,10 +147,10 @@ export default function FlightTimeline({
 
         {/* Arrival */}
         <div className="text-center shrink-0">
-          <p className={compact ? 'text-sm font-semibold' : 'text-lg font-semibold'}>
+          <p className={`${compact ? 'text-sm font-semibold' : 'text-lg font-semibold'} text-gray-900 dark:text-gray-100`}>
             {formatTime(arrival)}
           </p>
-          <p className="text-xs text-gray-500 font-medium">{dest}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{dest}</p>
         </div>
       </div>
     </div>

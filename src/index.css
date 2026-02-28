@@ -1,10 +1,23 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-gray-50 text-gray-900 antialiased dark:bg-gray-900 dark:text-gray-100;
     font-family: Inter, system-ui, -apple-system, sans-serif;
     margin: 0;
     min-height: 100vh;
+  }
+}
+
+/* Dark mode transition for smooth theme switching */
+@layer base {
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html {
+    transition: color 0.2s ease, background-color 0.2s ease;
   }
 }

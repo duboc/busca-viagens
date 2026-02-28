@@ -133,13 +133,13 @@ export default function ResultsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/" className="text-sm text-blue-600 hover:underline">&larr; Voltar</Link>
-          <h1 className="text-lg font-bold text-gray-900 mt-1">
+          <Link to="/" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">&larr; Voltar</Link>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-1 transition-colors">
             {currentSearch.parsedOrigin ?? '?'} &rarr; {currentSearch.parsedDest ?? '?'}
             {currentSearch.dateFrom && `, ${currentSearch.dateFrom}`}
           </h1>
           {searchTimeStr && (
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
               Busca concluida em {searchTimeStr} &middot; {flights.length} {flights.length === 1 ? 'resultado' : 'resultados'}
             </p>
           )}
@@ -149,14 +149,14 @@ export default function ResultsPage() {
             <>
               <button
                 onClick={handleExportCSV}
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+                className="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 transition-colors"
                 title="Exportar CSV"
               >
                 CSV
               </button>
               <button
                 onClick={handleExportJSON}
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+                className="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 transition-colors"
                 title="Exportar JSON"
               >
                 JSON
@@ -173,8 +173,8 @@ export default function ResultsPage() {
             onClick={() => setShowPriceChart(!showPriceChart)}
             className={`px-3 py-1.5 text-sm border rounded-lg transition-colors ${
               showPriceChart
-                ? 'border-blue-300 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+                ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-600 dark:bg-blue-900/30 dark:text-blue-300'
+                : 'border-gray-200 hover:bg-gray-50 text-gray-600 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-400'
             }`}
           >
             {showPriceChart ? 'Esconder Grafico' : 'Grafico'}
@@ -183,8 +183,8 @@ export default function ResultsPage() {
             onClick={() => setShowCalendar(!showCalendar)}
             className={`px-3 py-1.5 text-sm border rounded-lg transition-colors ${
               showCalendar
-                ? 'border-blue-300 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+                ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-600 dark:bg-blue-900/30 dark:text-blue-300'
+                : 'border-gray-200 hover:bg-gray-50 text-gray-600 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-400'
             }`}
           >
             {showCalendar ? 'Esconder Calendario' : 'Calendario'}

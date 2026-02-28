@@ -1,13 +1,15 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearchStore } from '../../stores/searchStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useAgentStore } from '../../stores/agentStore';
 import { exportCSV, exportJSON, downloadBlob } from '../../services/export';
 import { formatElapsedTime } from '../../utils/formatters';
+import { getAirlinesByAlliance } from '../../db/repositories/FlightRepository';
 import FlightCard from './FlightCard';
 import BadgeBar from './BadgeBar';
 import SortFilterBar from './SortFilterBar';
+import AllianceFilter from './AllianceFilter';
 import CalendarHeatmap from './CalendarHeatmap';
 import PriceChart from './PriceChart';
 import FlightDetailModal from './FlightDetailModal';
@@ -17,7 +19,8 @@ import EmptyState from '../shared/EmptyState';
 import { FlightCardSkeletonList } from '../shared/Skeleton';
 
 export default function ResultsPage() {
-  const { currentSearch, flights, sortBy, filterStops, setSortBy, setFilterStops, toggleCompare, compareIds } = useSearchStore();
+  const { currentSearch, flights, sortBy, filterStops, setSortBy, setFilterStops, toggleCompare, compareIds, filterAlliance } = useSearchStore();
+  const [allianceAirlineCodes, setAllianceAirlineCodes] = useState<Set<string>>(new Set());
   const { selectedFlightId, detailModalOpen, openDetailModal, closeDetailModal } = useUIStore();
   const { isRunning, searchStartTime, searchEndTime } = useAgentStore();
   const [showCalendar, setShowCalendar] = useState(false);
@@ -25,11 +28,36 @@ export default function ResultsPage() {
   const [showAlertForm, setShowAlertForm] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  // Load airline codes for the selected alliance
+  useEffect(() => {
+    if (!filterAlliance) {
+      setAllianceAirlineCodes(new Set());
+      return;
+    }
+    getAirlinesByAlliance(filterAlliance)
+      .then((airlines) => {
+        setAllianceAirlineCodes(new Set(airlines.map((a) => a.iataCode)));
+      })
+      .catch(() => setAllianceAirlineCodes(new Set()));
+  }, [filterAlliance]);
+
   const filteredAndSorted = useMemo(() => {
     let result = [...flights];
 
     if (filterStops !== null) {
       result = result.filter((f) => f.outboundStops <= filterStops);
+    }
+
+    // Alliance filter
+    if (filterAlliance && allianceAirlineCodes.size > 0) {
+      result = result.filter((f) => {
+        const outboundCode = f.outboundAirline?.substring(0, 2)?.toUpperCase();
+        const returnCode = f.returnAirline?.substring(0, 2)?.toUpperCase();
+        return (
+          (outboundCode && allianceAirlineCodes.has(outboundCode)) ||
+          (returnCode && allianceAirlineCodes.has(returnCode))
+        );
+      });
     }
 
     switch (sortBy) {
@@ -50,7 +78,7 @@ export default function ResultsPage() {
     }
 
     return result;
-  }, [flights, sortBy, filterStops]);
+  }, [flights, sortBy, filterStops, filterAlliance, allianceAirlineCodes]);
 
   const selectedFlight = selectedFlightId
     ? flights.find((f) => f.id === selectedFlightId) ?? null
@@ -220,13 +248,16 @@ export default function ResultsPage() {
 
       {/* Sort & filter */}
       {flights.length > 0 && (
-        <SortFilterBar
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          filterStops={filterStops}
-          onFilterStopsChange={setFilterStops}
-          totalResults={filteredAndSorted.length}
-        />
+        <div className="space-y-2">
+          <SortFilterBar
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            filterStops={filterStops}
+            onFilterStopsChange={setFilterStops}
+            totalResults={filteredAndSorted.length}
+          />
+          <AllianceFilter />
+        </div>
       )}
 
       {/* Skeleton loading state */}

@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { getDatabase, saveDatabase } from '../database';
-import type { Flight } from '../../agents/types';
+import type { Flight, ExploreDestination, AirlineInfo } from '../../agents/types';
 
 export async function insertFlights(flights: Flight[]): Promise<void> {
   const db = await getDatabase();
@@ -118,6 +118,83 @@ export async function getMinPriceByDate(
     map[row[0] as string] = row[1] as number;
   }
   return map;
+}
+
+export async function getExploreDestinations(
+  origin?: string,
+): Promise<ExploreDestination[]> {
+  const db = await getDatabase();
+  let query = `SELECT outbound_dest as outboundDest, MIN(price) as minPrice, COUNT(*) as flightCount
+     FROM flights`;
+  const params: string[] = [];
+  if (origin) {
+    query += ` WHERE outbound_origin = ?`;
+    params.push(origin);
+  }
+  query += ` GROUP BY outbound_dest ORDER BY minPrice ASC LIMIT 20`;
+  const results = db.exec(query, params);
+  if (!results.length) return [];
+  return results[0].values.map((row) => ({
+    outboundDest: row[0] as string,
+    minPrice: row[1] as number,
+    flightCount: row[2] as number,
+  }));
+}
+
+export async function getFlexDatePrices(
+  origin: string,
+  destination: string,
+  departureDates: string[],
+  returnDates: string[],
+): Promise<Record<string, Record<string, number>>> {
+  const db = await getDatabase();
+  const matrix: Record<string, Record<string, number>> = {};
+
+  for (const dep of departureDates) {
+    matrix[dep] = {};
+    for (const ret of returnDates) {
+      const results = db.exec(
+        `SELECT MIN(price) as min_price FROM flights
+         WHERE outbound_origin = ? AND outbound_dest = ?
+         AND date(outbound_departure) = ? AND date(return_departure) = ?`,
+        [origin, destination, dep, ret],
+      );
+      if (results.length && results[0].values.length && results[0].values[0][0] !== null) {
+        matrix[dep][ret] = results[0].values[0][0] as number;
+      }
+    }
+  }
+
+  return matrix;
+}
+
+export async function getAirlinesByAlliance(
+  alliance: string,
+): Promise<AirlineInfo[]> {
+  const db = await getDatabase();
+  const results = db.exec(
+    `SELECT iata_code, name, alliance FROM airlines WHERE alliance = ?`,
+    [alliance],
+  );
+  if (!results.length) return [];
+  return results[0].values.map((row) => ({
+    iataCode: row[0] as string,
+    name: row[1] as string,
+    alliance: row[2] as string | null,
+  }));
+}
+
+export async function getAllAirlines(): Promise<AirlineInfo[]> {
+  const db = await getDatabase();
+  const results = db.exec(
+    `SELECT iata_code, name, alliance FROM airlines ORDER BY name`,
+  );
+  if (!results.length) return [];
+  return results[0].values.map((row) => ({
+    iataCode: row[0] as string,
+    name: row[1] as string,
+    alliance: row[2] as string | null,
+  }));
 }
 
 function mapFlight(row: Record<string, unknown>): Flight {

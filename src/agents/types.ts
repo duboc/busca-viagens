@@ -21,6 +21,7 @@ export interface SearchPlan {
   };
   strategies: SearchStrategy[];
   reasoning: string;
+  legs?: MultiCityLeg[];
 }
 
 export interface SearchStrategy {
@@ -314,4 +315,22 @@ export interface MultiCityLeg {
   origin: string;
   destination: string;
   dateRange: DateRange;
+}
+
+// --- Explore Anywhere types ---
+
+export interface ExploreDestination {
+  outboundDest: string;
+  minPrice: number;
+  flightCount: number;
+}
+
+// --- Alliance filter types ---
+
+export type AllianceType = 'star_alliance' | 'skyteam' | 'oneworld';
+
+export interface AirlineInfo {
+  iataCode: string;
+  name: string;
+  alliance: string | null;
 }

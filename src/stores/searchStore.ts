@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import type { Search, Flight } from '../agents/types';
+import type { Search, Flight, MultiCityLeg, AllianceType } from '../agents/types';
+
+export type TripMode = 'roundtrip' | 'oneway' | 'multi_city';
 
 interface SearchState {
   currentSearch: Search | null;
@@ -8,6 +10,12 @@ interface SearchState {
   filterStops: number | null;
   recentSearches: Search[];
   compareIds: Set<string>;
+
+  // Smart features state
+  tripMode: TripMode;
+  multiCityLegs: MultiCityLeg[];
+  filterAlliance: AllianceType | null;
+  exploreOrigin: string;
 
   setCurrentSearch: (search: Search | null) => void;
   updateSearchStatus: (status: Search['status']) => void;
@@ -18,6 +26,12 @@ interface SearchState {
   toggleCompare: (id: string) => void;
   clearCompare: () => void;
   reset: () => void;
+
+  // Smart features actions
+  setTripMode: (mode: TripMode) => void;
+  setMultiCityLegs: (legs: MultiCityLeg[]) => void;
+  setFilterAlliance: (alliance: AllianceType | null) => void;
+  setExploreOrigin: (origin: string) => void;
 }
 
 export const useSearchStore = create<SearchState>((set) => ({
@@ -27,6 +41,15 @@ export const useSearchStore = create<SearchState>((set) => ({
   filterStops: null,
   recentSearches: [],
   compareIds: new Set<string>(),
+
+  // Smart features initial state
+  tripMode: 'roundtrip',
+  multiCityLegs: [
+    { origin: '', destination: '', dateRange: { from: '', to: '' } },
+    { origin: '', destination: '', dateRange: { from: '', to: '' } },
+  ],
+  filterAlliance: null,
+  exploreOrigin: '',
 
   setCurrentSearch: (search) => set({ currentSearch: search }),
   updateSearchStatus: (status) =>
@@ -58,4 +81,10 @@ export const useSearchStore = create<SearchState>((set) => ({
       filterStops: null,
       compareIds: new Set<string>(),
     }),
+
+  // Smart features actions
+  setTripMode: (mode) => set({ tripMode: mode }),
+  setMultiCityLegs: (legs) => set({ multiCityLegs: legs }),
+  setFilterAlliance: (alliance) => set({ filterAlliance: alliance }),
+  setExploreOrigin: (origin) => set({ exploreOrigin: origin }),
 }));

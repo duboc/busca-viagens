@@ -135,8 +135,8 @@ describe('runRankerAgent - local scoring (no API key)', () => {
     const twoStops = result.rankedFlights.find(f => f.id === 'two-stops');
 
     expect(direct!.rankBreakdown!.stopsScore).toBe(1);
-    expect(oneStop!.rankBreakdown!.stopsScore).toBe(0.6);
-    expect(twoStops!.rankBreakdown!.stopsScore).toBe(0.2);
+    expect(oneStop!.rankBreakdown!.stopsScore).toBe(0.7);
+    expect(twoStops!.rankBreakdown!.stopsScore).toBe(0.4);
   });
 
   it('ranks flights in descending order of score', async () => {

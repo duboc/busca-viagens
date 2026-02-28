@@ -57,19 +57,19 @@ function BadgeItem({
   color: 'green' | 'blue' | 'yellow';
 }) {
   const colors = {
-    green: 'bg-green-50 border-green-200',
-    blue: 'bg-blue-50 border-blue-200',
-    yellow: 'bg-yellow-50 border-yellow-200',
+    green: 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800',
+    blue: 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800',
+    yellow: 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800',
   };
 
   return (
-    <div className={`rounded-xl border p-3 ${colors[color]}`}>
+    <div className={`rounded-xl border p-3 transition-colors ${colors[color]}`}>
       <div className="flex items-center gap-2">
         <span className="text-lg">{icon}</span>
-        <span className="text-xs font-semibold text-gray-600">{title}</span>
+        <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{title}</span>
       </div>
-      <p className="text-lg font-bold text-gray-900 mt-1">{value}</p>
-      <p className="text-xs text-gray-500">{subtitle}</p>
+      <p className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-1">{value}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
     </div>
   );
 }

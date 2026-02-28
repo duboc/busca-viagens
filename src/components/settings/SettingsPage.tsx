@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { useThemeStore } from '../../stores/themeStore';
+import type { Theme } from '../../stores/themeStore';
 import { getRecentSearches } from '../../db/repositories/SearchRepository';
 import { getFlightsBySearch } from '../../db/repositories/FlightRepository';
 import { getAgentLogsBySearch } from '../../db/repositories/AgentLogRepository';
@@ -7,8 +9,15 @@ import { getAllAlerts } from '../../db/repositories/AlertRepository';
 import { downloadBlob } from '../../services/export';
 import { getPermissionStatus, requestPermission, isSupported } from '../../services/notifications';
 
+const THEME_OPTIONS: { value: Theme; label: string; description: string }[] = [
+  { value: 'light', label: 'Claro', description: 'Fundo claro com texto escuro' },
+  { value: 'dark', label: 'Escuro', description: 'Fundo escuro com texto claro' },
+  { value: 'system', label: 'Sistema', description: 'Segue a preferencia do seu sistema operacional' },
+];
+
 export default function SettingsPage() {
   const settings = useSettingsStore();
+  const { theme, setTheme, resolvedTheme } = useThemeStore();
   const [testResult, setTestResult] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
   const [dbSize, setDbSize] = useState<string>('Calculando...');
@@ -138,6 +147,8 @@ export default function SettingsPage() {
     unsupported: 'Nao suportadas',
   };
 
+  const currentResolved = resolvedTheme();
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       {/* Toast notification */}
@@ -147,9 +158,41 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Configuracoes</h1>
+      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 transition-colors">Configuracoes</h1>
 
       <div className="space-y-6">
+        {/* Theme */}
+        <Section title="Aparencia" description="Escolha o tema visual da aplicacao.">
+          <div className="space-y-3">
+            {THEME_OPTIONS.map((opt) => (
+              <label
+                key={opt.value}
+                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  theme === opt.value
+                    ? 'border-blue-400 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/30'
+                    : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="theme"
+                  value={opt.value}
+                  checked={theme === opt.value}
+                  onChange={() => setTheme(opt.value)}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{opt.label}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{opt.description}</p>
+                </div>
+              </label>
+            ))}
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+              Tema atual aplicado: <span className="font-medium text-gray-600 dark:text-gray-300">{currentResolved === 'dark' ? 'Escuro' : 'Claro'}</span>
+            </p>
+          </div>
+        </Section>
+
         {/* Gemini API Key */}
         <Section title="Gemini API Key" description="Necessaria para todas as funcionalidades de busca.">
           <div className="flex gap-2">
@@ -158,7 +201,7 @@ export default function SettingsPage() {
               value={settings.geminiApiKey}
               onChange={(e) => settings.setGeminiApiKey(e.target.value)}
               placeholder="AIzaSy..."
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             />
             <button
               onClick={testApiKey}
@@ -169,7 +212,7 @@ export default function SettingsPage() {
             </button>
           </div>
           {testResult && (
-            <p className={`text-xs mt-1 ${testResult.includes('valida') ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-xs mt-1 ${testResult.includes('valida') ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
               {testResult}
             </p>
           )}
@@ -182,14 +225,14 @@ export default function SettingsPage() {
             value={settings.amadeusClientId}
             onChange={(e) => settings.setAmadeusCredentials(e.target.value, settings.amadeusClientSecret)}
             placeholder="Client ID"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           />
           <input
             type="password"
             value={settings.amadeusClientSecret}
             onChange={(e) => settings.setAmadeusCredentials(settings.amadeusClientId, e.target.value)}
             placeholder="Client Secret"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           />
         </Section>
 
@@ -197,11 +240,11 @@ export default function SettingsPage() {
         <Section title="Preferencias de Viagem">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Moeda</label>
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Moeda</label>
               <select
                 value={settings.currency}
                 onChange={(e) => settings.setCurrency(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value="BRL">BRL — Real</option>
                 <option value="USD">USD — Dolar</option>
@@ -209,11 +252,11 @@ export default function SettingsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Classe preferida</label>
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Classe preferida</label>
               <select
                 value={settings.preferredCabin}
                 onChange={(e) => settings.setPreferredCabin(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value="economy">Economica</option>
                 <option value="premium_economy">Premium Economy</option>
@@ -222,11 +265,11 @@ export default function SettingsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Max. paradas</label>
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Max. paradas</label>
               <select
                 value={settings.maxStops}
                 onChange={(e) => settings.setMaxStops(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value={0}>Direto</option>
                 <option value={1}>1 parada</option>
@@ -235,14 +278,14 @@ export default function SettingsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Verificar alertas (min)</label>
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Verificar alertas (min)</label>
               <input
                 type="number"
                 min={5}
                 max={120}
                 value={settings.alertCheckInterval}
                 onChange={(e) => settings.setAlertCheckInterval(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               />
             </div>
           </div>
@@ -252,7 +295,7 @@ export default function SettingsPage() {
         <Section title="Notificacoes" description="Permissao para notificacoes do navegador para alertas de preco.">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
                 Status: <span className="font-medium">{notifLabel[notifPermission] ?? notifPermission}</span>
               </p>
             </div>
@@ -265,7 +308,7 @@ export default function SettingsPage() {
               </button>
             )}
             {notifPermission === 'denied' && (
-              <p className="text-xs text-red-500">
+              <p className="text-xs text-red-500 dark:text-red-400">
                 Notificacoes bloqueadas. Altere nas configuracoes do navegador.
               </p>
             )}
@@ -276,18 +319,18 @@ export default function SettingsPage() {
         <Section title="Armazenamento" description="Seus dados ficam 100% no seu dispositivo.">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Banco de dados (SQLite)</span>
-              <span className="font-medium text-gray-900">{dbSize}</span>
+              <span className="text-gray-600 dark:text-gray-400">Banco de dados (SQLite)</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">{dbSize}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Uso total do localStorage</span>
-              <span className="font-medium text-gray-900">{storageUsage}</span>
+              <span className="text-gray-600 dark:text-gray-400">Uso total do localStorage</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">{storageUsage}</span>
             </div>
-            <div className="border-t border-gray-100 pt-3 flex flex-wrap gap-2">
+            <div className="border-t border-gray-100 dark:border-gray-700 pt-3 flex flex-wrap gap-2">
               <button
                 onClick={handleExportAll}
                 disabled={exportingAll}
-                className="px-4 py-2 border border-blue-200 text-blue-600 rounded-lg text-sm hover:bg-blue-50 disabled:opacity-50"
+                className="px-4 py-2 border border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-400 rounded-lg text-sm hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 transition-colors"
               >
                 {exportingAll ? 'Exportando...' : 'Exportar Todos os Dados'}
               </button>
@@ -299,7 +342,7 @@ export default function SettingsPage() {
                     window.location.reload();
                   }
                 }}
-                className="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm hover:bg-red-50"
+                className="px-4 py-2 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg text-sm hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
               >
                 Limpar Todos os Dados
               </button>
@@ -321,9 +364,9 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
-      {description && <p className="text-xs text-gray-400 mt-0.5 mb-3">{description}</p>}
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 transition-colors">
+      <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{title}</h2>
+      {description && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 mb-3">{description}</p>}
       {!description && <div className="mt-3" />}
       {children}
     </div>

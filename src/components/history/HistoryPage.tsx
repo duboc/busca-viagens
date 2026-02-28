@@ -115,9 +115,9 @@ export default function HistoryPage() {
 
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-gray-900">Historico de Buscas</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 transition-colors">Historico de Buscas</h1>
           {searches.length > 0 && (
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-400 dark:text-gray-500">
               {searches.length} {searches.length === 1 ? 'busca' : 'buscas'}
             </span>
           )}
@@ -125,7 +125,7 @@ export default function HistoryPage() {
         <div className="flex items-center gap-2">
           <Link
             to="/analytics"
-            className="px-3 py-1.5 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 font-medium"
+            className="px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 font-medium transition-colors"
           >
             Ver Analytics
           </Link>
@@ -133,7 +133,7 @@ export default function HistoryPage() {
             <button
               onClick={handleBulkExport}
               disabled={exporting === 'bulk'}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              className="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 transition-colors"
             >
               {exporting === 'bulk' ? 'Exportando...' : 'Exportar Tudo'}
             </button>
@@ -166,43 +166,43 @@ export default function HistoryPage() {
             {searches.map((s) => (
               <div
                 key={s.id}
-                className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-all group"
+                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:shadow-sm dark:hover:shadow-black/20 transition-all group"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{s.rawInput}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{s.rawInput}</p>
 
                     <div className="flex flex-wrap items-center gap-2 mt-2">
                       {s.parsedOrigin && s.parsedDest && (
-                        <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
                           <PlaneIcon />
                           {s.parsedOrigin} &rarr; {s.parsedDest}
                         </span>
                       )}
                       {s.dateFrom && (
-                        <span className="text-xs bg-gray-50 text-gray-600 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">
                           {s.dateFrom}
                           {s.dateTo && s.dateTo !== s.dateFrom && ` - ${s.dateTo}`}
                         </span>
                       )}
                       {s.tripType !== 'roundtrip' && (
-                        <span className="text-xs bg-gray-50 text-gray-600 px-2 py-0.5 rounded-full capitalize">
+                        <span className="text-xs bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full capitalize">
                           {s.tripType === 'oneway' ? 'Somente ida' : 'Multi-cidades'}
                         </span>
                       )}
                       {s.maxBudget && (
-                        <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
                           Ate {s.currency} {s.maxBudget.toLocaleString()}
                         </span>
                       )}
                       {s.passengers > 1 && (
-                        <span className="text-xs bg-gray-50 text-gray-600 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">
                           {s.passengers} passageiros
                         </span>
                       )}
                     </div>
 
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                       {formatRelativeTime(s.createdAt)}
                     </p>
                   </div>
@@ -212,7 +212,7 @@ export default function HistoryPage() {
                       <button
                         onClick={() => handleExportSearch(s)}
                         disabled={exporting === s.id}
-                        className="px-2.5 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="px-2.5 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         {exporting === s.id ? '...' : 'Exportar'}
                       </button>
@@ -223,11 +223,11 @@ export default function HistoryPage() {
                     <button
                       onClick={() => handleDelete(s.id)}
                       disabled={deletingId === s.id}
-                      className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                       title="Excluir busca"
                     >
                       {deletingId === s.id ? (
-                        <span className="block w-4 h-4 animate-spin rounded-full border-2 border-gray-200 border-t-red-400" />
+                        <span className="block w-4 h-4 animate-spin rounded-full border-2 border-gray-200 dark:border-gray-600 border-t-red-400" />
                       ) : (
                         <TrashIcon />
                       )}
@@ -245,13 +245,13 @@ export default function HistoryPage() {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    completed: 'bg-green-100 text-green-700',
-    failed: 'bg-red-100 text-red-700',
-    pending: 'bg-gray-100 text-gray-600',
-    searching: 'bg-blue-100 text-blue-700',
-    planning: 'bg-blue-100 text-blue-700',
-    parsing: 'bg-blue-100 text-blue-700',
-    ranking: 'bg-blue-100 text-blue-700',
+    completed: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+    failed: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+    pending: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+    searching: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    planning: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    parsing: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    ranking: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   };
   const labels: Record<string, string> = {
     completed: 'Concluida',

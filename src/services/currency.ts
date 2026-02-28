@@ -1,4 +1,4 @@
-import { CACHE_TTL } from '../utils/constants';
+import { CACHE_TTL, EXCHANGE_RATE_API_URL } from '../utils/constants';
 import type { CurrencyRates } from '../agents/types';
 
 /**
@@ -59,7 +59,7 @@ async function fetchLiveRates(): Promise<CurrencyRates> {
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const res = await fetch(
-      'https://open.er-api.com/v6/latest/USD',
+      EXCHANGE_RATE_API_URL,
       { signal: controller.signal },
     );
     clearTimeout(timeoutId);

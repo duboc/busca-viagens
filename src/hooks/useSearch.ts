@@ -11,7 +11,8 @@ export function useSearch() {
   const navigate = useNavigate();
   const { setCurrentSearch, setFlights, reset: resetSearch } = useSearchStore();
   const { addStep, setRunning, addTokens, addLatency, reset: resetAgent } = useAgentStore();
-  const { geminiApiKey } = useSettingsStore();
+  const { effectiveGeminiKey } = useSettingsStore();
+  const geminiApiKey = effectiveGeminiKey();
   const { setError } = useUIStore();
   const [plan, setPlan] = useState<SearchPlan | null>(null);
   const abortRef = useRef(false);

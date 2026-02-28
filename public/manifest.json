@@ -1,0 +1,10 @@
+{
+  "name": "SkyAgent — Flight Search",
+  "short_name": "SkyAgent",
+  "description": "AI-powered flight search agent",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#2563eb",
+  "icons": []
+}

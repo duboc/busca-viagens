@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 const NAV_ITEMS = [
   { to: '/', label: 'Buscar', icon: '🔍' },
   { to: '/history', label: 'Histórico', icon: '📊' },
+  { to: '/analytics', label: 'Analytics', icon: '📈' },
   { to: '/alerts', label: 'Alertas', icon: '🔔' },
   { to: '/settings', label: 'Configurações', icon: '⚙️' },
 ];

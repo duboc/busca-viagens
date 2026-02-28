@@ -122,15 +122,23 @@ export default function HistoryPage() {
             </span>
           )}
         </div>
-        {searches.length > 0 && (
-          <button
-            onClick={handleBulkExport}
-            disabled={exporting === 'bulk'}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+        <div className="flex items-center gap-2">
+          <Link
+            to="/analytics"
+            className="px-3 py-1.5 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 font-medium"
           >
-            {exporting === 'bulk' ? 'Exportando...' : 'Exportar Tudo'}
-          </button>
-        )}
+            Ver Analytics
+          </Link>
+          {searches.length > 0 && (
+            <button
+              onClick={handleBulkExport}
+              disabled={exporting === 'bulk'}
+              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            >
+              {exporting === 'bulk' ? 'Exportando...' : 'Exportar Tudo'}
+            </button>
+          )}
+        </div>
       </div>
 
       {searches.length === 0 ? (

@@ -4,20 +4,24 @@ import { useSearchStore } from '../../stores/searchStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useAgentStore } from '../../stores/agentStore';
 import { exportCSV, exportJSON, downloadBlob } from '../../services/export';
+import { formatElapsedTime } from '../../utils/formatters';
 import FlightCard from './FlightCard';
 import BadgeBar from './BadgeBar';
 import SortFilterBar from './SortFilterBar';
 import CalendarHeatmap from './CalendarHeatmap';
+import PriceChart from './PriceChart';
 import FlightDetailModal from './FlightDetailModal';
 import AgentStatusBar from '../agent/AgentStatusBar';
 import AlertForm from '../alerts/AlertForm';
 import EmptyState from '../shared/EmptyState';
+import { FlightCardSkeletonList } from '../shared/Skeleton';
 
 export default function ResultsPage() {
-  const { currentSearch, flights, sortBy, filterStops, setSortBy, setFilterStops } = useSearchStore();
+  const { currentSearch, flights, sortBy, filterStops, setSortBy, setFilterStops, toggleCompare, compareIds } = useSearchStore();
   const { selectedFlightId, detailModalOpen, openDetailModal, closeDetailModal } = useUIStore();
-  const { isRunning } = useAgentStore();
+  const { isRunning, searchStartTime, searchEndTime } = useAgentStore();
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showPriceChart, setShowPriceChart] = useState(false);
   const [showAlertForm, setShowAlertForm] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -66,6 +70,14 @@ export default function ResultsPage() {
     return Math.min(...flights.map((f) => f.price));
   }, [flights]);
 
+  // Calculate search time
+  const searchTimeStr = useMemo(() => {
+    if (searchStartTime && searchEndTime && !isRunning) {
+      return formatElapsedTime(searchEndTime - searchStartTime);
+    }
+    return null;
+  }, [searchStartTime, searchEndTime, isRunning]);
+
   const showToast = useCallback((message: string) => {
     setToast(message);
     setTimeout(() => setToast(null), 3000);
@@ -113,7 +125,7 @@ export default function ResultsPage() {
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
       {/* Toast notification */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium animate-fade-in">
+        <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium">
           {toast}
         </div>
       )}
@@ -126,6 +138,11 @@ export default function ResultsPage() {
             {currentSearch.parsedOrigin ?? '?'} &rarr; {currentSearch.parsedDest ?? '?'}
             {currentSearch.dateFrom && `, ${currentSearch.dateFrom}`}
           </h1>
+          {searchTimeStr && (
+            <p className="text-xs text-gray-400 mt-0.5">
+              Busca concluida em {searchTimeStr} &middot; {flights.length} {flights.length === 1 ? 'resultado' : 'resultados'}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {flights.length > 0 && (
@@ -153,8 +170,22 @@ export default function ResultsPage() {
             </>
           )}
           <button
+            onClick={() => setShowPriceChart(!showPriceChart)}
+            className={`px-3 py-1.5 text-sm border rounded-lg transition-colors ${
+              showPriceChart
+                ? 'border-blue-300 bg-blue-50 text-blue-700'
+                : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+            }`}
+          >
+            {showPriceChart ? 'Esconder Grafico' : 'Grafico'}
+          </button>
+          <button
             onClick={() => setShowCalendar(!showCalendar)}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+            className={`px-3 py-1.5 text-sm border rounded-lg transition-colors ${
+              showCalendar
+                ? 'border-blue-300 bg-blue-50 text-blue-700'
+                : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+            }`}
           >
             {showCalendar ? 'Esconder Calendario' : 'Calendario'}
           </button>
@@ -182,6 +213,11 @@ export default function ResultsPage() {
         <CalendarHeatmap flights={flights} month={calendarMonth} />
       )}
 
+      {/* Price chart */}
+      {showPriceChart && flights.length > 0 && (
+        <PriceChart flights={flights} currency={currentSearch.currency} />
+      )}
+
       {/* Sort & filter */}
       {flights.length > 0 && (
         <SortFilterBar
@@ -193,6 +229,11 @@ export default function ResultsPage() {
         />
       )}
 
+      {/* Skeleton loading state */}
+      {isRunning && flights.length === 0 && (
+        <FlightCardSkeletonList count={4} />
+      )}
+
       {/* Flight list */}
       {filteredAndSorted.length > 0 ? (
         <div className="space-y-3">
@@ -202,6 +243,8 @@ export default function ResultsPage() {
               flight={flight}
               rank={i + 1}
               onSelect={openDetailModal}
+              isComparing={compareIds.has(flight.id)}
+              onToggleCompare={toggleCompare}
             />
           ))}
         </div>
@@ -212,6 +255,11 @@ export default function ResultsPage() {
           description="Tente ajustar os filtros ou fazer uma nova busca com datas mais flexiveis."
         />
       ) : null}
+
+      {/* Skeleton after first results while still loading */}
+      {isRunning && flights.length > 0 && (
+        <FlightCardSkeletonList count={2} />
+      )}
 
       {/* Detail modal */}
       <FlightDetailModal
